@@ -55,3 +55,22 @@ contract BitkoopGame {
     error Game_NoHashSet();
 
     event DailyClaimed(address indexed user, uint256 amount, uint256 streakDays);
+    event RedemptionRewardsClaimed(address indexed user, uint256 slotsCredited, uint256 amount);
+    event CouponHuntWon(address indexed user, uint256 amount);
+    event CouponHuntSet(bytes32 hash, uint256 endBlock);
+    event RewardsUpdated(uint256 daily, uint256 redeem, uint256 couponHunt);
+    event PauseSet(bool paused);
+
+    constructor(address _ledger, address _token, address _gameOwner) {
+        if (_ledger == address(0) || _token == address(0) || _gameOwner == address(0)) revert Game_ZeroAddress();
+        ledger = IBitkoopLedger(_ledger);
+        token = IBitkoopToken(_token);
+        gameOwner = _gameOwner;
+        dailyReward = DAILY_REWARD;
+        redeemReward = REDEEM_REWARD;
+        couponHuntReward = COUPON_HUNT_REWARD;
+    }
+
+    modifier onlyOwner() {
+        if (msg.sender != gameOwner) revert Game_Forbidden();
+        _;
