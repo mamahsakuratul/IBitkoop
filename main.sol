@@ -112,3 +112,22 @@ contract BitkoopGame {
         else if (streak >= 7) reward += STREAK_BONUS_7;
         else if (streak >= 3) reward += STREAK_BONUS_3;
 
+        token.mint(msg.sender, reward);
+        emit DailyClaimed(msg.sender, reward, streak);
+    }
+
+    /// @notice Claim BKOOP for your redemptions on the Bitkoop ledger (scans new slots since last claim).
+    function claimRedemptionRewards() external whenNotPaused {
+        uint256 count = ledger.slotCount();
+        uint256 start = lastClaimedSlotIndex[msg.sender];
+        if (count <= start) revert Game_NoNewRedemptions();
+
+        uint256 end = start + MAX_SLOTS_PER_CLAIM;
+        if (end > count) end = count;
+        uint256 credited = 0;
+        for (uint256 i = start; i < end; i++) {
+            (, , , address user) = ledger.getSlot(i);
+            if (user == msg.sender) credited += 1;
+        }
+        lastClaimedSlotIndex[msg.sender] = end;
+        uint256 amount = credited * redeemReward;
