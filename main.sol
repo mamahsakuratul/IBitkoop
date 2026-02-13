@@ -93,3 +93,22 @@ contract BitkoopGame {
         if (last != 0) {
             if (nowBlock >= lastStreakDayBlock[msg.sender] + BLOCKS_PER_DAY) {
                 uint256 daysSince = (nowBlock - lastStreakDayBlock[msg.sender]) / BLOCKS_PER_DAY;
+                if (daysSince == 1) {
+                    streak += 1;
+                } else {
+                    streak = 1;
+                }
+            } else {
+                streak = 1;
+            }
+        } else {
+            streak = 1;
+        }
+        streakDays[msg.sender] = streak;
+        lastStreakDayBlock[msg.sender] = nowBlock;
+        lastDailyBlock[msg.sender] = nowBlock;
+
+        if (streak >= 30) reward += STREAK_BONUS_30;
+        else if (streak >= 7) reward += STREAK_BONUS_7;
+        else if (streak >= 3) reward += STREAK_BONUS_3;
+
