@@ -74,3 +74,22 @@ contract BitkoopGame {
     modifier onlyOwner() {
         if (msg.sender != gameOwner) revert Game_Forbidden();
         _;
+    }
+
+    modifier whenNotPaused() {
+        if (paused) revert Game_Paused();
+        _;
+    }
+
+    /// @notice Claim daily reward (once per BLOCKS_PER_DAY). Streak bonus if consecutive days.
+    function claimDaily() external whenNotPaused {
+        uint256 nowBlock = block.number;
+        uint256 last = lastDailyBlock[msg.sender];
+        if (last != 0 && nowBlock < last + BLOCKS_PER_DAY) revert Game_TooSoon();
+
+        uint256 reward = dailyReward;
+        uint256 streak = streakDays[msg.sender];
+        uint256 dayBlock = (last == 0) ? nowBlock : last;
+        if (last != 0) {
+            if (nowBlock >= lastStreakDayBlock[msg.sender] + BLOCKS_PER_DAY) {
+                uint256 daysSince = (nowBlock - lastStreakDayBlock[msg.sender]) / BLOCKS_PER_DAY;
