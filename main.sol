@@ -36,3 +36,22 @@ contract BitkoopGame {
     uint256 public couponHuntReward;
     bool public paused;
 
+    mapping(address => uint256) public lastDailyBlock;
+    mapping(address => uint256) public lastClaimedSlotIndex;
+    mapping(address => uint256) public streakDays;
+    mapping(address => uint256) public lastStreakDayBlock;
+    bytes32 public couponHuntHash;
+    uint256 public couponHuntEndBlock;
+    mapping(address => bool) public hasClaimedThisCouponHunt;
+
+    error Game_Forbidden();
+    error Game_ZeroAddress();
+    error Game_Paused();
+    error Game_TooSoon();
+    error Game_NoNewRedemptions();
+    error Game_CodeExpired();
+    error Game_WrongCode();
+    error Game_AlreadyClaimed();
+    error Game_NoHashSet();
+
+    event DailyClaimed(address indexed user, uint256 amount, uint256 streakDays);
