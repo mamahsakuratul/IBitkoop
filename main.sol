@@ -169,3 +169,18 @@ contract BitkoopGame {
         uint256 last = lastDailyBlock[user];
         if (last == 0) return 0;
         return last + BLOCKS_PER_DAY;
+    }
+
+    function pendingRedemptionSlots(address user) external view returns (uint256) {
+        uint256 count = ledger.slotCount();
+        uint256 start = lastClaimedSlotIndex[user];
+        if (count <= start) return 0;
+        uint256 n = 0;
+        uint256 end = count < start + MAX_SLOTS_PER_CLAIM ? count : start + MAX_SLOTS_PER_CLAIM;
+        for (uint256 i = start; i < end; i++) {
+            (, , , address slotUser) = ledger.getSlot(i);
+            if (slotUser == user) n++;
+        }
+        return n;
+    }
+}
