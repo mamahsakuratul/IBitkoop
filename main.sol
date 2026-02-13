@@ -131,3 +131,22 @@ contract BitkoopGame {
         }
         lastClaimedSlotIndex[msg.sender] = end;
         uint256 amount = credited * redeemReward;
+        if (amount == 0) revert Game_NoNewRedemptions();
+        token.mint(msg.sender, amount);
+        emit RedemptionRewardsClaimed(msg.sender, credited, amount);
+    }
+
+    /// @notice Solve coupon hunt: submit preimage such that keccak256(code) == couponHuntHash (before end block).
+    function submitCouponCode(bytes calldata code) external whenNotPaused {
+        if (couponHuntHash == bytes32(0)) revert Game_NoHashSet();
+        if (block.number > couponHuntEndBlock) revert Game_CodeExpired();
+        if (hasClaimedThisCouponHunt[msg.sender]) revert Game_AlreadyClaimed();
+        if (keccak256(code) != couponHuntHash) revert Game_WrongCode();
+        hasClaimedThisCouponHunt[msg.sender] = true;
+        token.mint(msg.sender, couponHuntReward);
+        emit CouponHuntWon(msg.sender, couponHuntReward);
+    }
+
+    function setCouponHunt(bytes32 _hash, uint256 _endBlock) external onlyOwner {
+        couponHuntHash = _hash;
+        couponHuntEndBlock = _endBlock;
