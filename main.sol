@@ -150,3 +150,22 @@ contract BitkoopGame {
     function setCouponHunt(bytes32 _hash, uint256 _endBlock) external onlyOwner {
         couponHuntHash = _hash;
         couponHuntEndBlock = _endBlock;
+        emit CouponHuntSet(_hash, _endBlock);
+    }
+
+    function setRewards(uint256 _daily, uint256 _redeem, uint256 _couponHunt) external onlyOwner {
+        dailyReward = _daily;
+        redeemReward = _redeem;
+        couponHuntReward = _couponHunt;
+        emit RewardsUpdated(_daily, _redeem, _couponHunt);
+    }
+
+    function setPaused(bool _paused) external onlyOwner {
+        paused = _paused;
+        emit PauseSet(_paused);
+    }
+
+    function nextDailyBlock(address user) external view returns (uint256) {
+        uint256 last = lastDailyBlock[user];
+        if (last == 0) return 0;
+        return last + BLOCKS_PER_DAY;
